@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  createdAt     DateTime       @default(now())
+  lastActiveAt  DateTime       @default(now())
+  profile       Profile?
+  sessions      Session[]
+  magicTokens   MagicToken[]
+  enrollments   Enrollment[]
+  dailyTasks    DailyTask[]
+  streak        Streak?
+  checkins      Checkin[]
+  conversations Conversation[]
+}
+
+model Profile {
+  userId              String @id
+  displayName         String
+  timezone            String
+  onboardingCompleted Boolean @default(false)
+  onboardingAnswers   Json?
+  user                User @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model MagicToken {
+  token     String   @id
+  userId    String
+  email     String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Enrollment {
+  id         String   @id @default(uuid())
+  userId     String
+  protocolId String
+  startDate  String
+  active     Boolean  @default(true)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model DailyTask {
+  id          String   @id
+  userId      String
+  dayKey      String
+  order       Int
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, dayKey])
+}
+
+model Streak {
+  userId              String  @id
+  currentStreak       Int
+  lastQualifiedDayKey String?
+  user                User    @relation(fields: [userId], references: [id])
+}
+
+model Checkin {
+  id        String   @id @default(uuid())
+  userId    String
+  dayKey    String
+  focus     Int
+  calm      Int
+  energy    Int
+  note      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, dayKey])
+}
+
+model Conversation {
+  id         String    @id @default(uuid())
+  userId     String
+  protocolId String
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+  messages   Message[]
+
+  @@unique([userId, protocolId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  role           MessageRole
+  content        String
+  createdAt      DateTime     @default(now())
+  inputTokens    Int?
+  outputTokens   Int?
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+enum MessageRole {
+  user
+  assistant
+}

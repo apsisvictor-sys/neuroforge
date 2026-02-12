@@ -1,0 +1,37 @@
+import { NextRequest } from "next/server";
+import { getTrackingHistory } from "@/application/use-cases/get-tracking-history";
+import { requireUserId } from "@/infrastructure/auth/require-user";
+import { repositories } from "@/infrastructure/db/repositories";
+import { ok, serverError, withApiLogging } from "@/lib/api";
+
+function parseLimit(raw: string | null): number {
+  const defaultLimit = 30;
+  const minLimit = 1;
+  const maxLimit = 90;
+
+  const parsed = Number.parseInt(raw ?? "", 10);
+  if (!Number.isFinite(parsed)) {
+    return defaultLimit;
+  }
+
+  return Math.min(maxLimit, Math.max(minLimit, parsed));
+}
+
+export const GET = withApiLogging("/api/tracking/history", "GET", async (request: NextRequest) => {
+  try {
+    const auth = await requireUserId();
+    if ("response" in auth) return auth.response;
+
+    const limit = parseLimit(request.nextUrl.searchParams.get("limit"));
+
+    const history = await getTrackingHistory({
+      userId: auth.userId,
+      limit,
+      trackingRepository: repositories.tracking
+    });
+
+    return ok({ history });
+  } catch (error) {
+    return serverError(error);
+  }
+});

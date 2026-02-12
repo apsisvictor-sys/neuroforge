@@ -1,0 +1,29 @@
+{
+  "name": "neuroforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types tests/unit/*.test.ts tests/integration/*.test.ts",
+    "seed:demo": "node --experimental-strip-types scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zod": "3.24.1",
+    "@prisma/client": "6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "prisma": "6.2.1",
+    "typescript": "5.7.2"
+  }
+}
