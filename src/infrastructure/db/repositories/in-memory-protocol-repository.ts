@@ -1,12 +1,17 @@
-import type { DailyTaskInstance, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
+import type { DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
 import type { ProtocolRepository } from "@/domain/repositories/protocol-repository";
 import { protocolTemplates } from "@/protocol-engine/definitions/templates";
+import { toProtocolCatalogItem } from "@/protocol-engine/definitions/map-catalog-item";
 import { createId } from "@/lib/ids/create-id";
 import { getMemoryStore } from "./memory-store";
 
 export class InMemoryProtocolRepository implements ProtocolRepository {
   async listTemplates(): Promise<ProtocolTemplate[]> {
     return protocolTemplates;
+  }
+
+  async listTemplateCatalog(): Promise<ProtocolCatalogItem[]> {
+    return protocolTemplates.map(toProtocolCatalogItem);
   }
 
   async getTemplateById(id: string): Promise<ProtocolTemplate | null> {

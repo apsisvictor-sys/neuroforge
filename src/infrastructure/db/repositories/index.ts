@@ -1,13 +1,13 @@
-import { InMemoryAuthRepository } from "./in-memory-auth-repository";
-import { InMemoryConversationRepository } from "./in-memory-conversation-repository";
-import { InMemoryProtocolRepository } from "./in-memory-protocol-repository";
-import { InMemoryTrackingRepository } from "./in-memory-tracking-repository";
-import { InMemoryUserRepository } from "./in-memory-user-repository";
+import { PrismaAuthRepository } from "./prisma-auth-repository.ts";
+import { PrismaConversationRepository } from "./prisma-conversation-repository.ts";
+import { PrismaProtocolRepository } from "./prisma-protocol-repository.ts";
+import { PrismaTrackingRepository } from "./prisma-tracking-repository.ts";
+import { PrismaUserRepository } from "./prisma-user-repository.ts";
 
 export const repositories = {
-  auth: new InMemoryAuthRepository(),
-  conversation: new InMemoryConversationRepository(),
-  protocol: new InMemoryProtocolRepository(),
-  tracking: new InMemoryTrackingRepository(),
-  user: new InMemoryUserRepository()
+  auth: new PrismaAuthRepository(),
+  conversation: new PrismaConversationRepository(),
+  protocol: new PrismaProtocolRepository(),
+  tracking: new PrismaTrackingRepository(),
+  user: new PrismaUserRepository()
 };

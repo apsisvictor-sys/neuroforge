@@ -29,7 +29,7 @@ Goal: Replace in-memory repositories with database-backed repositories safely.
 
 - [ ] Implement Prisma repository adapters
 - [ ] Keep repository interfaces unchanged
-- [ ] Swap dependency injection binding only
+- [x] Swap dependency injection binding only
 - [ ] Add database migration command
 - [ ] Add database seed script version
 - [ ] Add transaction safety where needed
@@ -50,7 +50,7 @@ Goal: Expand from single protocol to protocol catalog system.
 - [ ] Add protocol selector UI
 - [ ] Add protocol preview screen
 - [ ] Add protocol explanation screens
-- [ ] Add protocol metadata endpoint
+- [x] Add protocol metadata endpoint
 - [ ] Support multiple static protocol templates
 
 Protocols remain static and deterministic.

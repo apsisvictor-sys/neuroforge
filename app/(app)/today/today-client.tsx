@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getJson, postJsonWithNonce } from "@/ui/hooks/use-api";
+import { TodayProtocolHeader } from "@/components/today/TodayProtocolHeader";
 import { FeedbackBanner } from "@/ui/components/FeedbackBanner";
 
 type TodayResponse = {
@@ -13,10 +14,15 @@ type TodayResponse = {
   streak: number;
 };
 
+type ProtocolCurrentResponse = {
+  protocol: { name: string; slug: string } | null;
+};
+
 export function TodayClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [data, setData] = useState<TodayResponse | null>(null);
+  const [protocolContext, setProtocolContext] = useState<{ title: string; slug: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingTasks, setPendingTasks] = useState<Record<string, boolean>>({});
   const [feedback, setFeedback] = useState<{ type: "success" | "error" | "info"; message: string | null }>({
@@ -29,6 +35,16 @@ export function TodayClient() {
     try {
       const response = await getJson<TodayResponse>("/api/today");
       setData(response);
+      try {
+        const protocolResponse = await getJson<ProtocolCurrentResponse>("/api/protocol/current");
+        setProtocolContext(
+          protocolResponse.protocol
+            ? { title: protocolResponse.protocol.name, slug: protocolResponse.protocol.slug }
+            : null
+        );
+      } catch {
+        setProtocolContext(null);
+      }
       setError(null);
     } catch (err) {
       setError((err as Error).message);
@@ -53,6 +69,11 @@ export function TodayClient() {
       {error ? <p>{error}</p> : null}
       {data ? (
         <>
+          {protocolContext ? (
+            <TodayProtocolHeader title={protocolContext.title} slug={protocolContext.slug} />
+          ) : (
+            <p>No active protocol</p>
+          )}
           <p>
             Day {data.dayNumber} | Phase: {data.phaseName} | Streak: {data.streak}
           </p>

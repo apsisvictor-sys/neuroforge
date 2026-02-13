@@ -1,4 +1,5 @@
 import type {
+  ProtocolCatalogItem,
   DailyTaskInstance,
   ProtocolTemplate,
   StreakState,
@@ -7,6 +8,7 @@ import type {
 
 export interface ProtocolRepository {
   listTemplates(): Promise<ProtocolTemplate[]>;
+  listTemplateCatalog(): Promise<ProtocolCatalogItem[]>;
   getTemplateById(id: string): Promise<ProtocolTemplate | null>;
   getTemplateBySlug(slug: string): Promise<ProtocolTemplate | null>;
   getActiveEnrollment(userId: string): Promise<UserProtocolEnrollment | null>;

@@ -79,3 +79,21 @@
 
 ## Architecture Docs
 - [ ] Added repository and dependency-injection architecture document (`ARCHITECTURE_REPOSITORY_DI.md`)
+
+## Phase 1.2
+- [x] Implement PrismaUserRepository adapter
+- [x] Implement PrismaAuthRepository adapter
+- [x] Implement PrismaTrackingRepository adapter
+- [x] Implement PrismaConversationRepository adapter
+- [x] Implement PrismaProtocolRepository adapter
+- [x] Swap DI bindings to Prisma repositories
+- [x] Add Prisma integration parity tests
+- [x] Add protocol catalog metadata endpoint
+- [x] Add protocol selector UI page
+- [x] Add protocol detail read-only page
+
+## Phase 1.3
+- [x] Add protocol enrollment action from detail page
+- [x] Add enrollment status CTA logic on protocol page
+- [x] Add today page protocol context display
+- [x] Enrich protocol catalog card preview metadata

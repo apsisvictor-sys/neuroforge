@@ -71,7 +71,19 @@ const userRepository: UserRepository = {
   }
 };
 
-const protocolRepository: ProtocolRepository = {
+const protocolRepository: Pick<
+  ProtocolRepository,
+  | "listTemplates"
+  | "getTemplateById"
+  | "getTemplateBySlug"
+  | "getActiveEnrollment"
+  | "enroll"
+  | "listDailyTasks"
+  | "replaceDailyTasks"
+  | "toggleTask"
+  | "getStreak"
+  | "saveStreak"
+> = {
   async listTemplates() {
     return protocolTemplates;
   },

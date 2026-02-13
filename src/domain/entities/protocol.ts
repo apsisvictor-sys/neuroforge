@@ -29,6 +29,15 @@ export type ProtocolTemplate = {
   phases: ProtocolPhase[];
 };
 
+export type ProtocolCatalogItem = {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  totalDays: number;
+  phaseCount: number;
+};
+
 export type UserProtocolEnrollment = {
   id: string;
   userId: string;
