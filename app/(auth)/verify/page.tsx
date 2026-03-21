@@ -1,11 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { postJson } from "@/ui/hooks/use-api";
 import { FeedbackBanner } from "@/ui/components/FeedbackBanner";
 
-export default function VerifyPage() {
+function VerifyForm() {
   const search = useSearchParams();
   const initialToken = useMemo(() => search.get("token") ?? "", [search]);
   const [token, setToken] = useState(initialToken);
@@ -18,8 +19,7 @@ export default function VerifyPage() {
   const [status, setStatus] = useState("");
 
   return (
-    <main>
-      <h2>Verify Magic Link</h2>
+    <>
       <FeedbackBanner type={feedback.type} message={feedback.message} />
       <form
         onSubmit={async (event) => {
@@ -57,6 +57,17 @@ export default function VerifyPage() {
         </button>
       </form>
       <p>{status}</p>
+    </>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <main>
+      <h2>Verify Magic Link</h2>
+      <Suspense fallback={<p>Loading...</p>}>
+        <VerifyForm />
+      </Suspense>
     </main>
   );
 }

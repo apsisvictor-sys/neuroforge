@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import type { ProtocolCatalogItem } from "../../src/domain/entities/protocol.ts";
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+// Only run against a real DB — skip if DATABASE_URL is unset or still the placeholder value.
+const hasDatabase =
+  Boolean(process.env.DATABASE_URL) &&
+  process.env.DATABASE_URL !== "postgresql://user:pass@localhost:5432/neuroforge";
 
 test("protocol catalog repository returns catalog items with expected shape", { skip: !hasDatabase }, async () => {
   const { repositories } = await import("../../src/infrastructure/db/repositories/index.ts");

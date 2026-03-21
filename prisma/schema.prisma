@@ -54,17 +54,27 @@ model Enrollment {
   startDate  String
   active     Boolean  @default(true)
   user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, active])
 }
 
 model DailyTask {
-  id          String   @id
-  userId      String
-  dayKey      String
-  order       Int
-  completed   Boolean  @default(false)
-  completedAt DateTime?
+  id                String    @id
+  userId            String
+  protocolId        String
+  phaseId           String
+  dayKey            String
+  taskDefinitionId  String
+  title             String
+  instructions      String
+  category          String
+  estimatedMinutes  Int
+  order             Int
+  required          Boolean   @default(true)
+  completed         Boolean   @default(false)
+  completedAt       DateTime?
 
-  user        User     @relation(fields: [userId], references: [id])
+  user              User      @relation(fields: [userId], references: [id])
 
   @@index([userId, dayKey])
 }
@@ -88,6 +98,7 @@ model Checkin {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, dayKey])
+  @@index([userId, dayKey(sort: Desc)])
 }
 
 model Conversation {
@@ -110,6 +121,8 @@ model Message {
   inputTokens    Int?
   outputTokens   Int?
   conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId, createdAt])
 }
 
 enum MessageRole {

@@ -1,11 +1,10 @@
 import type { DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
 import type { ProtocolRepository } from "@/domain/repositories/protocol-repository";
 import { prisma } from "@/infrastructure/db/prisma-client";
-import { protocolTemplates } from "@/protocol-engine/definitions/templates";
-import { toProtocolCatalogItem } from "@/protocol-engine/definitions/map-catalog-item";
+import { NotFoundError } from "@/infrastructure/errors/common-errors";
 import { createId } from "@/lib/ids/create-id";
-
-const taskCache = new Map<string, DailyTaskInstance>();
+import { memoizedProtocolTemplateDefinitions } from "./protocol-template-cache";
+import type { TaskCategory } from "@/domain/types/common";
 
 function mapEnrollment(row: {
   id: string;
@@ -23,22 +22,35 @@ function mapEnrollment(row: {
   };
 }
 
-function mapTaskFromRow(row: {
+function mapTask(row: {
   id: string;
   userId: string;
+  protocolId: string;
+  phaseId: string;
   dayKey: string;
+  taskDefinitionId: string;
+  title: string;
+  instructions: string;
+  category: string;
+  estimatedMinutes: number;
   order: number;
+  required: boolean;
   completed: boolean;
   completedAt: Date | null;
 }): DailyTaskInstance {
-  const cached = taskCache.get(row.id);
-  if (!cached) {
-    throw new Error(`Task metadata missing for DailyTaskInstance id: ${row.id}`);
-  }
-
   return {
-    ...cached,
+    id: row.id,
+    userId: row.userId,
+    protocolId: row.protocolId,
+    phaseId: row.phaseId,
+    dayKey: row.dayKey,
+    taskDefinitionId: row.taskDefinitionId,
+    title: row.title,
+    instructions: row.instructions,
+    category: row.category as TaskCategory,
+    estimatedMinutes: row.estimatedMinutes,
     order: row.order,
+    required: row.required,
     completed: row.completed,
     completedAt: row.completedAt ? row.completedAt.toISOString() : null
   };
@@ -46,19 +58,19 @@ function mapTaskFromRow(row: {
 
 export class PrismaProtocolRepository implements ProtocolRepository {
   async listTemplates(): Promise<ProtocolTemplate[]> {
-    return protocolTemplates;
+    return memoizedProtocolTemplateDefinitions.templates as ProtocolTemplate[];
   }
 
   async listTemplateCatalog(): Promise<ProtocolCatalogItem[]> {
-    return protocolTemplates.map(toProtocolCatalogItem);
+    return memoizedProtocolTemplateDefinitions.catalogItems as ProtocolCatalogItem[];
   }
 
   async getTemplateById(id: string): Promise<ProtocolTemplate | null> {
-    return protocolTemplates.find((protocol) => protocol.id === id) ?? null;
+    return memoizedProtocolTemplateDefinitions.templates.find((protocol) => protocol.id === id) ?? null;
   }
 
   async getTemplateBySlug(slug: string): Promise<ProtocolTemplate | null> {
-    return protocolTemplates.find((protocol) => protocol.slug === slug) ?? null;
+    return memoizedProtocolTemplateDefinitions.templates.find((protocol) => protocol.slug === slug) ?? null;
   }
 
   async getActiveEnrollment(userId: string): Promise<UserProtocolEnrollment | null> {
@@ -69,6 +81,11 @@ export class PrismaProtocolRepository implements ProtocolRepository {
   }
 
   async enroll(userId: string, protocolId: string, startDate: string): Promise<UserProtocolEnrollment> {
+    const template = await this.getTemplateById(protocolId);
+    if (!template) {
+      throw new NotFoundError("Protocol template not found");
+    }
+
     const current = await this.getActiveEnrollment(userId);
     if (current) return current;
 
@@ -91,16 +108,7 @@ export class PrismaProtocolRepository implements ProtocolRepository {
       orderBy: { order: "asc" }
     });
 
-    return rows.map((row) =>
-      mapTaskFromRow({
-        id: row.id,
-        userId: row.userId,
-        dayKey: row.dayKey,
-        order: row.order,
-        completed: row.completed,
-        completedAt: row.completedAt
-      })
-    );
+    return rows.map(mapTask);
   }
 
   async replaceDailyTasks(userId: string, dayKey: string, tasks: DailyTaskInstance[]): Promise<void> {
@@ -114,18 +122,22 @@ export class PrismaProtocolRepository implements ProtocolRepository {
           data: tasks.map((task) => ({
             id: task.id,
             userId: task.userId,
+            protocolId: task.protocolId,
+            phaseId: task.phaseId,
             dayKey: task.dayKey,
+            taskDefinitionId: task.taskDefinitionId,
+            title: task.title,
+            instructions: task.instructions,
+            category: task.category,
+            estimatedMinutes: task.estimatedMinutes,
             order: task.order,
+            required: task.required,
             completed: task.completed,
             completedAt: task.completedAt ? new Date(task.completedAt) : null
           }))
         });
       }
     });
-
-    for (const task of tasks) {
-      taskCache.set(task.id, task);
-    }
   }
 
   async toggleTask(taskId: string): Promise<DailyTaskInstance | null> {
@@ -142,16 +154,7 @@ export class PrismaProtocolRepository implements ProtocolRepository {
       data: { completed, completedAt }
     });
 
-    const mapped = mapTaskFromRow({
-      id: row.id,
-      userId: row.userId,
-      dayKey: row.dayKey,
-      order: row.order,
-      completed: row.completed,
-      completedAt: row.completedAt
-    });
-    taskCache.set(taskId, mapped);
-    return mapped;
+    return mapTask(row);
   }
 
   async getStreak(userId: string): Promise<StreakState> {

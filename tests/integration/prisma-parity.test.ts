@@ -4,7 +4,10 @@ import { prisma } from "../../src/infrastructure/db/prisma-client.ts";
 import type { DailyTaskInstance } from "../../src/domain/entities/protocol.ts";
 import { createId } from "../../src/lib/ids/create-id.ts";
 
-const hasDatabase = Boolean(process.env.DATABASE_URL);
+// Only run against a real DB — skip if DATABASE_URL is unset or still the placeholder value.
+const hasDatabase =
+  Boolean(process.env.DATABASE_URL) &&
+  process.env.DATABASE_URL !== "postgresql://user:pass@localhost:5432/neuroforge";
 
 async function resetDatabase(): Promise<void> {
   await prisma.message.deleteMany();
