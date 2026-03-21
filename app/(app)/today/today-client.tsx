@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getJson, postJsonWithNonce } from "@/ui/hooks/use-api";
 import { TodayProtocolHeader } from "@/components/today/TodayProtocolHeader";
 import { FeedbackBanner } from "@/ui/components/FeedbackBanner";
+import { LoadingSpinner } from "@/ui/components/LoadingSpinner";
 
 type TodayResponse = {
   dayKey: string;
@@ -59,7 +60,7 @@ export function TodayClient() {
   }, []);
 
   if (isLoading && !hasLoadedOnce) {
-    return <p>Loading...</p>;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -83,7 +84,7 @@ export function TodayClient() {
           {data.tasks.length === 0 ? <p>No tasks for today</p> : null}
           <ul>
             {data.tasks.map((task) => (
-              <li key={task.id}>
+              <li key={task.id} style={{ opacity: pendingTasks[task.id] ? 0.5 : 1, transition: "opacity 0.15s" }}>
                 <label>
                   <input
                     type="checkbox"
@@ -103,7 +104,7 @@ export function TodayClient() {
                       }
                     }}
                   />
-                  {task.title} {task.required ? "(required)" : ""}
+                  {task.title} {task.required ? "(required)" : ""}{pendingTasks[task.id] ? " …" : ""}
                 </label>
               </li>
             ))}

@@ -26,7 +26,7 @@ export function ProtocolEnrollButton({ protocolId, disabled = false }: ProtocolE
           });
         }}
       >
-        Enroll in this protocol
+        {isSubmitting ? "Enrolling…" : "Enroll in this protocol"}
       </button>
       {message ? <p>{message}</p> : null}
     </div>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getJson, postJsonWithNonce } from "@/ui/hooks/use-api";
 import { FeedbackBanner } from "@/ui/components/FeedbackBanner";
+import { LoadingSpinner } from "@/ui/components/LoadingSpinner";
+import { EmptyState } from "@/ui/components/EmptyState";
 
 type HistoryItem = {
   dayKey: string;
@@ -42,7 +44,7 @@ export function TrackingClient() {
   const dayKey = new Date().toISOString().slice(0, 10);
 
   if (isLoading && !hasLoadedOnce) {
-    return <p>Loading history...</p>;
+    return <LoadingSpinner label="Loading history..." />;
   }
 
   return (
@@ -81,11 +83,13 @@ export function TrackingClient() {
         </label>
         <br />
         <button type="submit" disabled={isSubmitting}>
-          Save Daily Check-in
+          {isSubmitting ? "Saving…" : "Save Daily Check-in"}
         </button>
       </form>
       <h3>History</h3>
-      {history.length === 0 ? <p>No history yet</p> : null}
+      {history.length === 0 ? (
+        <EmptyState message="No check-ins yet" description="Your daily tracking history will appear here." />
+      ) : null}
       <ul>
         {history.map((item) => (
           <li key={item.dayKey}>
