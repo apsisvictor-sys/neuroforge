@@ -604,13 +604,20 @@ export default function OnboardingPage() {
     if (phase.kind !== "commitment") return;
     setCommitting(true);
     try {
-      // Fire commitment event (best-effort; email scheduling is PIX-33)
-      await postJson("/api/onboarding", {
-        workRhythm: "assessment-driven",
-        preferredTrainingWindow: startDate,
-        overwhelmTriggers: [],
-        focusFrictionPatterns: [],
-      }).catch(() => {});
+      const result = phase.result;
+      // Save onboarding answers and schedule email nurture sequence (both best-effort)
+      await Promise.allSettled([
+        postJson("/api/onboarding", {
+          workRhythm: "assessment-driven",
+          preferredTrainingWindow: startDate,
+          overwhelmTriggers: [],
+          focusFrictionPatterns: [],
+        }),
+        postJson("/api/onboarding/commit", {
+          primaryType: TYPE_LABELS[result.primaryType],
+          recommendedProtocol: result.recommendedProtocolTrack,
+        }),
+      ]);
       setPhase({ kind: "day-one" });
     } finally {
       setCommitting(false);
