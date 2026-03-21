@@ -5,25 +5,37 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types tests/unit/*.test.ts tests/integration/*.test.ts",
-    "seed:demo": "node --experimental-strip-types scripts/seed-demo.ts"
+    "test": "node -r tsconfig-paths/register --test --experimental-strip-types tests/unit/*.test.ts tests/integration/*.test.ts tests/architecture/*.test.ts",
+    "seed:demo": "node --experimental-strip-types scripts/seed-demo.ts",
+    "worker": "tsx scripts/start-worker.ts",
+    "secrets:generate": "bash scripts/deploy/generate-secrets.sh",
+    "deploy:railway": "bash scripts/deploy/railway-provision-and-deploy.sh",
+    "provision:upstash": "bash scripts/deploy/upstash-provision.sh"
   },
   "dependencies": {
     "@prisma/client": "6.2.1",
+    "bullmq": "^5.58.5",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.3",
     "next": "15.1.11",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "resend": "^6.9.2",
     "zod": "3.24.1"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.1.6",
     "prisma": "6.2.1",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "5.7.2"
   }
 }

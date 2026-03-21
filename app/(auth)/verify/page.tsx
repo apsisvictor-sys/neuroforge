@@ -8,7 +8,7 @@ import { FeedbackBanner } from "@/ui/components/FeedbackBanner";
 
 function VerifyForm() {
   const search = useSearchParams();
-  const initialToken = useMemo(() => search.get("token") ?? "", [search]);
+  const initialToken = useMemo(() => search?.get("token") ?? "", [search]);
   const [token, setToken] = useState(initialToken);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);

@@ -14,7 +14,7 @@ export function AppNav() {
       return pathname === "/";
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return pathname === href || (pathname?.startsWith(`${href}/`) ?? false);
   };
 
   const linkStyle = (href: string): { fontWeight: number; textDecoration: string; color: string } => ({
