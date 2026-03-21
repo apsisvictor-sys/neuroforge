@@ -1,4 +1,5 @@
 import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
+import type { AssessmentResult } from "@/domain/assessment/types";
 
 export interface UserRepository {
   getByEmail(email: string): Promise<User | null>;
@@ -8,4 +9,5 @@ export interface UserRepository {
   getProfile(userId: string): Promise<UserProfile | null>;
   upsertProfile(input: { userId: string; displayName: string; timezone: string }): Promise<UserProfile>;
   saveOnboarding(userId: string, answers: OnboardingResponse): Promise<UserProfile>;
+  saveAssessment(userId: string, result: AssessmentResult): Promise<UserProfile>;
 }

@@ -1,4 +1,5 @@
 import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
+import type { AssessmentResult } from "@/domain/assessment/types";
 import type { UserRepository } from "@/domain/repositories/user-repository";
 import { createId } from "@/lib/ids/create-id";
 import { getMemoryStore } from "./memory-store";
@@ -63,6 +64,16 @@ export class InMemoryUserRepository implements UserRepository {
 
     profile.onboardingAnswers = answers;
     profile.onboardingCompleted = true;
+    return profile;
+  }
+
+  async saveAssessment(userId: string, result: AssessmentResult): Promise<UserProfile> {
+    const profile = await this.getProfile(userId);
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    profile.onboardingAnswers = { ...profile.onboardingAnswers, assessment: result };
     return profile;
   }
 }

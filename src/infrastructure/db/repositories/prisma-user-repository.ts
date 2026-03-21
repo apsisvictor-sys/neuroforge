@@ -1,5 +1,6 @@
 import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
 import type { UserRepository } from "@/domain/repositories/user-repository";
+import type { AssessmentResult } from "@/domain/assessment/types";
 import { prisma } from "@/infrastructure/db/prisma-client";
 import { Prisma } from "@prisma/client";
 
@@ -116,6 +117,31 @@ export class PrismaUserRepository implements UserRepository {
         throw new Error("Profile not found");
       }
 
+      throw error;
+    }
+  }
+
+  async saveAssessment(userId: string, result: AssessmentResult): Promise<UserProfile> {
+    try {
+      // Merge assessment into existing onboardingAnswers (preserves legacy fields)
+      const existing = await prisma.profile.findUnique({ where: { userId } });
+      const current = (existing?.onboardingAnswers ?? {}) as Record<string, unknown>;
+
+      const row = await prisma.profile.update({
+        where: { userId },
+        data: {
+          onboardingAnswers: { ...current, assessment: result as unknown as Prisma.JsonValue },
+        },
+      });
+
+      return mapProfile(row);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new Error("Profile not found");
+      }
       throw error;
     }
   }

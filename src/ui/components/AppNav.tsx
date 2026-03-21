@@ -46,6 +46,9 @@ export function AppNav() {
           <Link href="/assistant" style={linkStyle("/assistant")}>
             Assistant
           </Link>
+          <Link href="/assessment" style={linkStyle("/assessment")}>
+            Assessment
+          </Link>
           <Link href="/protocol" style={linkStyle("/protocol")}>
             Protocol
           </Link>

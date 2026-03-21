@@ -1,3 +1,5 @@
+import type { AssessmentResult } from "@/domain/assessment/types";
+
 export type User = {
   id: string;
   email: string;
@@ -14,8 +16,11 @@ export type UserProfile = {
 };
 
 export type OnboardingResponse = {
-  workRhythm: string;
-  overwhelmTriggers: string[];
-  preferredTrainingWindow: string;
-  focusFrictionPatterns: string[];
+  // Legacy onboarding fields (backward compat)
+  workRhythm?: string;
+  overwhelmTriggers?: string[];
+  preferredTrainingWindow?: string;
+  focusFrictionPatterns?: string[];
+  // Assessment fields (Phase 2.1+)
+  assessment?: AssessmentResult;
 };
