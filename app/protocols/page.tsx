@@ -1,21 +1,18 @@
-import { ProtocolCatalogCard } from "@/components/protocol/ProtocolCatalogCard";
-import { loadProtocolCatalog } from "./catalog-loader";
+import { ProtocolCatalogClientView } from "@/components/protocol/ProtocolCatalogClientView";
+import { loadProtocolCatalog } from "@/application/protocol/load-protocol-catalog";
+import { repositories } from "@/infrastructure/db/repositories";
 
 export default async function ProtocolsPage() {
-  const { items, error } = await loadProtocolCatalog();
+  const { items, error } = await loadProtocolCatalog(repositories.protocol);
 
   return (
     <main>
-      <h2>Protocol Catalog</h2>
-      {error ? <p>{error}</p> : null}
-      {!error && items.length === 0 ? <p>No protocols available.</p> : null}
-      {!error && items.length > 0 ? (
-        <ul>
-          {items.map((item) => (
-            <ProtocolCatalogCard key={item.id} item={item} />
-          ))}
-        </ul>
-      ) : null}
+      <section className="protocol-catalog-header">
+        <h2>Protocol Catalog</h2>
+      </section>
+      <section className="protocol-catalog-list-section">
+        <ProtocolCatalogClientView items={items} error={error} />
+      </section>
     </main>
   );
 }

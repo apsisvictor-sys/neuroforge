@@ -14,6 +14,11 @@ export function toProtocolCatalogItem(
     shortDescription: template.description,
     totalDays,
     phaseCount: template.phases.length,
-    firstPhaseName: template.phases[0]?.name ?? "—"
+    firstPhaseName: template.phases[0]?.name ?? "—",
+    difficulty: template.difficulty,
+    pillar: template.pillar,
+    scienceSummary: template.scienceSummary,
+    expectedOutcome: template.expectedOutcome,
+    prerequisites: template.prerequisites
   };
 }

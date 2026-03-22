@@ -62,6 +62,18 @@ export default async function ProtocolPage({ searchParams }: ProtocolDetailPageP
     <main>
       <ProtocolDetailHeader title={result.template.name} isEnrolled={result.isEnrolledInThisProtocol} />
       <ProtocolDescription description={result.template.description} />
+      {result.template.scientificRationale && (
+        <section className="protocol-detail-science-section">
+          <h4>Why this works</h4>
+          <p>{result.template.scientificRationale}</p>
+        </section>
+      )}
+      {result.template.expectedOutcome && (
+        <section className="protocol-detail-outcome-section">
+          <h4>Expected outcomes</h4>
+          <p>{result.template.expectedOutcome}</p>
+        </section>
+      )}
       <div className="protocol-detail-meta-row">
         {result.isEnrolledInThisProtocol ? (
           <>

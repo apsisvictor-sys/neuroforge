@@ -1,5 +1,14 @@
 import type { TaskCategory } from "@/domain/types/common";
 
+export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
+
+export type ProtocolPillar =
+  | "Dopamine Reset"
+  | "Neurochemical Support"
+  | "Nervous System Regulation"
+  | "Behavioral Reward Rewiring"
+  | "Attention & Focus";
+
 export type ProtocolTaskDefinition = {
   id: string;
   title: string;
@@ -27,6 +36,12 @@ export type ProtocolTemplate = {
   description: string;
   version: number;
   phases: ProtocolPhase[];
+  difficulty?: DifficultyLevel;
+  pillar?: ProtocolPillar;
+  scientificRationale?: string;
+  scienceSummary?: string;
+  expectedOutcome?: string;
+  prerequisites?: string[];
 };
 
 export type ProtocolCatalogItem = {
@@ -36,6 +51,11 @@ export type ProtocolCatalogItem = {
   shortDescription: string;
   totalDays: number;
   phaseCount: number;
+  difficulty?: DifficultyLevel;
+  pillar?: ProtocolPillar;
+  scienceSummary?: string;
+  expectedOutcome?: string;
+  prerequisites?: string[];
 };
 
 export type UserProtocolEnrollment = {

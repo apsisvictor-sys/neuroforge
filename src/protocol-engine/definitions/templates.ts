@@ -1,4 +1,14 @@
 import type { ProtocolTemplate } from "@/domain/entities/protocol";
+import { stimulusReductionProtocol } from "@/content/protocols/stimulus-reduction";
+import { scrollEliminationProtocol } from "@/content/protocols/scroll-elimination";
+import { sleepOptimizationProtocol } from "@/content/protocols/sleep-optimization";
+import { caffeineRegulationProtocol } from "@/content/protocols/caffeine-regulation";
+import { boxBreathingProtocol } from "@/content/protocols/box-breathing";
+import { contrastExposureProtocol } from "@/content/protocols/contrast-exposure";
+import { effortFirstRewardProtocol } from "@/content/protocols/effort-first-reward";
+import { microAchievementTrackingProtocol } from "@/content/protocols/micro-achievement-tracking";
+import { deepWorkBlocksProtocol } from "@/content/protocols/deep-work-blocks";
+import { morningIntentionProtocol } from "@/content/protocols/morning-intention";
 
 export const protocolTemplates: ProtocolTemplate[] = [
   {
@@ -7,6 +17,12 @@ export const protocolTemplates: ProtocolTemplate[] = [
     name: "Core Reset",
     description: "Daily regulation and focus restoration protocol for overstimulated operators.",
     version: 1,
+    difficulty: "beginner",
+    pillar: "Nervous System Regulation",
+    scientificRationale: "Chronic stress and digital overstimulation suppress prefrontal cortex function and dysregulate the HPA axis, reducing voluntary attention control and baseline motivation. Structured breathwork combined with progressive focus sessions rebuilds parasympathetic tone, restores cortisol rhythms, and strengthens dopaminergic pathways through consistent behavioral patterning.",
+    scienceSummary: "Structured breathwork and progressive focus sprints rebuild parasympathetic tone and restore dopaminergic motivation pathways.",
+    expectedOutcome: "Reduced baseline anxiety and measurable improvement in sustained focus capacity within 7–14 days of consistent practice.",
+    prerequisites: [],
     phases: [
       {
         id: "phase-stabilize",
@@ -77,5 +93,15 @@ export const protocolTemplates: ProtocolTemplate[] = [
         ]
       }
     ]
-  }
+  },
+  stimulusReductionProtocol,
+  scrollEliminationProtocol,
+  sleepOptimizationProtocol,
+  caffeineRegulationProtocol,
+  boxBreathingProtocol,
+  contrastExposureProtocol,
+  effortFirstRewardProtocol,
+  microAchievementTrackingProtocol,
+  deepWorkBlocksProtocol,
+  morningIntentionProtocol
 ];
