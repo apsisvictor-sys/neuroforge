@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "prisma generate",
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node -r tsconfig-paths/register --test --experimental-strip-types tests/unit/*.test.ts tests/integration/*.test.ts tests/architecture/*.test.ts",
+    "test": "tsx --test tests/unit/*.test.ts tests/integration/*.test.ts tests/architecture/*.test.ts",
     "seed:demo": "node --experimental-strip-types scripts/seed-demo.ts",
     "worker": "tsx scripts/start-worker.ts",
     "secrets:generate": "bash scripts/deploy/generate-secrets.sh",
@@ -25,6 +26,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "resend": "^6.9.2",
+    "stripe": "^20.4.1",
     "zod": "3.24.1"
   },
   "devDependencies": {
