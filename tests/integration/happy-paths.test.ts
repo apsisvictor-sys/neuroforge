@@ -23,7 +23,7 @@ function resetMemoryStore(): void {
 
 function createUser(email: string): { id: string; email: string } {
   const now = new Date().toISOString();
-  const user = { id: createId(), email, createdAt: now, lastActiveAt: now };
+  const user = { id: createId(), email, createdAt: now, lastActiveAt: now, subscriptionTier: "free" as const };
   getMemoryStore().users.push(user);
   getMemoryStore().profiles.push({
     userId: user.id,
