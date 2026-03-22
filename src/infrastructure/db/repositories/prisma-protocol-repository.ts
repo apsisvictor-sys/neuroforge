@@ -1,4 +1,4 @@
-import type { DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
+import type { DailyCompletionSummary, DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
 import type { ProtocolRepository } from "@/domain/repositories/protocol-repository";
 import { prisma } from "@/infrastructure/db/prisma-client";
 import { NotFoundError } from "@/infrastructure/errors/common-errors";
@@ -194,6 +194,35 @@ export class PrismaProtocolRepository implements ProtocolRepository {
         currentStreak: streak.currentStreak,
         lastQualifiedDayKey: streak.lastQualifiedDayKey
       }
+    });
+  }
+
+  async getDailyCompletionSummaries(userId: string, days: number): Promise<DailyCompletionSummary[]> {
+    const rows = await prisma.dailyTask.findMany({
+      where: { userId },
+      select: { dayKey: true, completed: true }
+    });
+
+    const grouped = new Map<string, { completed: number; total: number }>();
+    for (const row of rows) {
+      const existing = grouped.get(row.dayKey) ?? { completed: 0, total: 0 };
+      existing.total++;
+      if (row.completed) existing.completed++;
+      grouped.set(row.dayKey, existing);
+    }
+
+    const sortedKeys = Array.from(grouped.keys())
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, days);
+
+    return sortedKeys.map((dayKey) => {
+      const g = grouped.get(dayKey)!;
+      return {
+        dayKey,
+        completedCount: g.completed,
+        totalCount: g.total,
+        completionScore: g.total > 0 ? g.completed / g.total : 0
+      };
     });
   }
 }

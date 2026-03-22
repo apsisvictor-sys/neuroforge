@@ -12,6 +12,8 @@ import {
   sendOnboardingWeekly,
   type OnboardingEmailPayload,
 } from "@/infrastructure/email/onboarding-emails";
+import { computeAndSaveUserState } from "@/application/use-cases/compute-user-state";
+import { repositories } from "@/infrastructure/db/repositories";
 
 type WorkerJob = {
   name: string;
@@ -47,6 +49,17 @@ export async function startJobsWorker(): Promise<void> {
           case "streak.recompute":
             logger.info("Executing job streak.recompute", { jobName: job.name, payload: job.data });
             return;
+          case "user_state.recompute": {
+            const { userId } = job.data as { userId: string };
+            await computeAndSaveUserState({
+              userId,
+              userRepository: repositories.user,
+              trackingRepository: repositories.tracking,
+              protocolRepository: repositories.protocol,
+              userStateRepository: repositories.userState
+            });
+            return;
+          }
           case "onboarding.email_day1":
             await sendOnboardingDay1(job.data as OnboardingEmailPayload);
             return;

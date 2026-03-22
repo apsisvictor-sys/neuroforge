@@ -7,19 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SubscriptionTier {
+  free
+  premium
+  professional
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  createdAt     DateTime       @default(now())
-  lastActiveAt  DateTime       @default(now())
-  profile       Profile?
-  sessions      Session[]
-  magicTokens   MagicToken[]
-  enrollments   Enrollment[]
-  dailyTasks    DailyTask[]
-  streak        Streak?
-  checkins      Checkin[]
-  conversations Conversation[]
+  id               String           @id @default(uuid())
+  email            String           @unique
+  createdAt        DateTime         @default(now())
+  lastActiveAt     DateTime         @default(now())
+  subscriptionTier SubscriptionTier @default(free)
+  stripeCustomerId String?          @unique
+  profile          Profile?
+  sessions         Session[]
+  magicTokens      MagicToken[]
+  enrollments      Enrollment[]
+  dailyTasks       DailyTask[]
+  streak           Streak?
+  checkins         Checkin[]
+  conversations    Conversation[]
 }
 
 model Profile {
@@ -28,6 +36,7 @@ model Profile {
   timezone            String
   onboardingCompleted Boolean @default(false)
   onboardingAnswers   Json?
+  userState           Json?
   user                User @relation(fields: [userId], references: [id])
 }
 

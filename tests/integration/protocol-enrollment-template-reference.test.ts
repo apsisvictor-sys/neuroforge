@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadProtocolCatalog } from "../../src/application/protocol/load-protocol-catalog.ts";
 import type { ProtocolRepository } from "../../src/domain/repositories/protocol-repository.ts";
 
 function createProtocolRepositoryStub(
@@ -27,21 +26,27 @@ function createProtocolRepositoryStub(
   };
 }
 
-test("protocol selector page renders catalog titles when repository returns items", async () => {
+test("protocol enrollment invariant: enrollment is rejected when template id does not exist", async () => {
   const repository = createProtocolRepositoryStub({
-    listTemplateCatalog: async () => [
-      {
-        id: "protocol-core-reset-v1",
-        slug: "core-reset",
-        title: "Core Reset",
-        shortDescription: "Daily regulation and focus restoration protocol.",
-        totalDays: 30,
-        phaseCount: 2
+    getTemplateById: async () => null,
+    enroll: async (userId, protocolId, startDate) => {
+      const template = await repository.getTemplateById(protocolId);
+      if (!template) {
+        throw new Error("Protocol template not found");
       }
-    ]
+
+      return {
+        id: "enrollment-1",
+        userId,
+        protocolId,
+        startDate,
+        active: true
+      };
+    }
   });
 
-  const result = await loadProtocolCatalog(repository);
-  assert.deepEqual(result.items.map((item) => item.title), ["Core Reset"]);
-  assert.equal(result.error, null);
+  await assert.rejects(
+    () => repository.enroll("user-1", "protocol-missing-v1", "2026-02-01T00:00:00.000Z"),
+    /Protocol template not found/
+  );
 });

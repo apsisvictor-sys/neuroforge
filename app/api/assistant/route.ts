@@ -34,7 +34,11 @@ export async function POST(request: Request) {
     const contextInput =
       getAssistantContext(auth.userId) ??
       (await (async () => {
-        const computed = await buildAssistantContextInput(auth.userId, repositories.protocol);
+        const computed = await buildAssistantContextInput(auth.userId, repositories.protocol, {
+          trackingRepository: repositories.tracking,
+          userRepository: repositories.user,
+          userStateRepository: repositories.userState
+        });
         setAssistantContext(auth.userId, computed);
         return computed;
       })());

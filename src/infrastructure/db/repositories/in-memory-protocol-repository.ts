@@ -1,25 +1,37 @@
-import type { DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "@/domain/entities/protocol";
-import type { ProtocolRepository } from "@/domain/repositories/protocol-repository";
-import { protocolTemplates } from "@/protocol-engine/definitions/templates";
-import { toProtocolCatalogItem } from "@/protocol-engine/definitions/map-catalog-item";
-import { createId } from "@/lib/ids/create-id";
-import { getMemoryStore } from "./memory-store";
+import type { DailyCompletionSummary, DailyTaskInstance, ProtocolCatalogItem, ProtocolTemplate, StreakState, UserProtocolEnrollment } from "../../../domain/entities/protocol.ts";
+import type { ProtocolRepository } from "../../../domain/repositories/protocol-repository.ts";
+import { NotFoundError } from "../../errors/common-errors.ts";
+import { toProtocolCatalogItem } from "../../../protocol-engine/definitions/map-catalog-item.ts";
+import { createId } from "../../../lib/ids/create-id.ts";
+import { getMemoryStore } from "./memory-store.ts";
+import { memoizedProtocolTemplateDefinitions } from "./protocol-template-cache.ts";
 
 export class InMemoryProtocolRepository implements ProtocolRepository {
+  private readonly templates: ProtocolTemplate[];
+  private readonly catalogItems: ProtocolCatalogItem[];
+
+  constructor(templates: ProtocolTemplate[] = memoizedProtocolTemplateDefinitions.templates as ProtocolTemplate[]) {
+    this.templates = templates;
+    this.catalogItems =
+      templates === memoizedProtocolTemplateDefinitions.templates
+        ? (memoizedProtocolTemplateDefinitions.catalogItems as ProtocolCatalogItem[])
+        : templates.map(toProtocolCatalogItem);
+  }
+
   async listTemplates(): Promise<ProtocolTemplate[]> {
-    return protocolTemplates;
+    return this.templates;
   }
 
   async listTemplateCatalog(): Promise<ProtocolCatalogItem[]> {
-    return protocolTemplates.map(toProtocolCatalogItem);
+    return this.catalogItems;
   }
 
   async getTemplateById(id: string): Promise<ProtocolTemplate | null> {
-    return protocolTemplates.find((protocol) => protocol.id === id) ?? null;
+    return this.templates.find((protocol) => protocol.id === id) ?? null;
   }
 
   async getTemplateBySlug(slug: string): Promise<ProtocolTemplate | null> {
-    return protocolTemplates.find((protocol) => protocol.slug === slug) ?? null;
+    return this.templates.find((protocol) => protocol.slug === slug) ?? null;
   }
 
   async getActiveEnrollment(userId: string): Promise<UserProtocolEnrollment | null> {
@@ -27,6 +39,11 @@ export class InMemoryProtocolRepository implements ProtocolRepository {
   }
 
   async enroll(userId: string, protocolId: string, startDate: string): Promise<UserProtocolEnrollment> {
+    const template = await this.getTemplateById(protocolId);
+    if (!template) {
+      throw new NotFoundError("Protocol template not found");
+    }
+
     const current = await this.getActiveEnrollment(userId);
     if (current) return current;
 
@@ -86,5 +103,31 @@ export class InMemoryProtocolRepository implements ProtocolRepository {
     }
 
     store.streaks.push(streak);
+  }
+
+  async getDailyCompletionSummaries(userId: string, days: number): Promise<DailyCompletionSummary[]> {
+    const allTasks = getMemoryStore().dailyTasks.filter((t) => t.userId === userId);
+
+    const grouped = new Map<string, { completed: number; total: number }>();
+    for (const task of allTasks) {
+      const existing = grouped.get(task.dayKey) ?? { completed: 0, total: 0 };
+      existing.total++;
+      if (task.completed) existing.completed++;
+      grouped.set(task.dayKey, existing);
+    }
+
+    const sortedKeys = Array.from(grouped.keys())
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, days);
+
+    return sortedKeys.map((dayKey) => {
+      const g = grouped.get(dayKey)!;
+      return {
+        dayKey,
+        completedCount: g.completed,
+        totalCount: g.total,
+        completionScore: g.total > 0 ? g.completed / g.total : 0
+      };
+    });
   }
 }

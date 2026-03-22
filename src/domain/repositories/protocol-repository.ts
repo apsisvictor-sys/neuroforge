@@ -1,5 +1,6 @@
 import type {
   ProtocolCatalogItem,
+  DailyCompletionSummary,
   DailyTaskInstance,
   ProtocolTemplate,
   StreakState,
@@ -18,4 +19,5 @@ export interface ProtocolRepository {
   toggleTask(taskId: string): Promise<DailyTaskInstance | null>;
   getStreak(userId: string): Promise<StreakState>;
   saveStreak(streak: StreakState): Promise<void>;
+  getDailyCompletionSummaries(userId: string, days: number): Promise<DailyCompletionSummary[]>;
 }
