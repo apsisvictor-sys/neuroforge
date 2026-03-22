@@ -5,7 +5,7 @@ import { SupplementDisclaimerBanner } from "@/components/supplement/SupplementDi
 import { SupplementCategoryChip } from "@/components/supplement/SupplementCategoryChip";
 import { SupplementCatalogCard } from "@/components/supplement/SupplementCatalogCard";
 import { SUPPLEMENTS } from "@/data/supplements";
-import type { SupplementCategory } from "@/domain/entities/supplement";
+import type { SupplementCategory } from "@/components/supplement";
 
 const CATEGORIES = Object.keys(CATEGORY_CONFIG) as SupplementCategory[];
 

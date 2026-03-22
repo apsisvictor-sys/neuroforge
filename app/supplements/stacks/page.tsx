@@ -4,7 +4,7 @@ import { TS, PHASE_CONFIG } from "@/components/supplement/tokens";
 import { SupplementDisclaimerBanner } from "@/components/supplement/SupplementDisclaimerBanner";
 import { SupplementStackItem } from "@/components/supplement/SupplementStackItem";
 import { PHASE_STACKS, getSupplementById } from "@/data/supplements";
-import type { SupplementPhase } from "@/domain/entities/supplement";
+import type { SupplementPhase } from "@/components/supplement";
 import type { PhaseName } from "@/components/supplement/tokens";
 
 const PHASES: { key: SupplementPhase; focus: string }[] = [
