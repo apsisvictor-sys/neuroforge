@@ -1,5 +1,6 @@
 import type { DifficultyLevel, ProtocolPillar } from "@/domain/entities/protocol";
 import type { ProtocolRepository } from "@/domain/repositories/protocol-repository";
+import type { UserRepository } from "@/domain/repositories/user-repository";
 
 export type ProtocolCatalogDTO = {
   items: Array<{
@@ -15,14 +16,32 @@ export type ProtocolCatalogDTO = {
     expectedOutcome?: string;
     prerequisites?: string[];
   }>;
+  lockedCount: number;
   error: string | null;
 };
 
 export async function loadProtocolCatalog(
-  protocolRepository: ProtocolRepository
+  protocolRepository: ProtocolRepository,
+  options?: {
+    userId?: string;
+    userRepository?: Pick<UserRepository, "getById">;
+    freeProtocolLimit?: number;
+  }
 ): Promise<ProtocolCatalogDTO> {
   try {
-    const items = await protocolRepository.listTemplateCatalog();
+    const allItems = await protocolRepository.listTemplateCatalog();
+
+    let items = allItems;
+    let lockedCount = 0;
+
+    if (options?.userId && options.userRepository && options.freeProtocolLimit !== undefined) {
+      const user = await options.userRepository.getById(options.userId);
+      if (user?.subscriptionTier === "free") {
+        lockedCount = Math.max(0, allItems.length - options.freeProtocolLimit);
+        items = allItems.slice(0, options.freeProtocolLimit);
+      }
+    }
+
     return {
       items: items.map((item) => ({
         id: item.id,
@@ -37,9 +56,10 @@ export async function loadProtocolCatalog(
         expectedOutcome: item.expectedOutcome,
         prerequisites: item.prerequisites
       })),
+      lockedCount,
       error: null
     };
   } catch {
-    return { items: [], error: "Failed to load protocol catalog." };
+    return { items: [], lockedCount: 0, error: "Failed to load protocol catalog." };
   }
 }
