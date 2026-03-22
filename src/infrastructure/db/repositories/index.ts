@@ -4,6 +4,7 @@ import { PrismaProtocolRepository } from "./prisma-protocol-repository.ts";
 import { PrismaTrackingRepository } from "./prisma-tracking-repository.ts";
 import { PrismaUserRepository } from "./prisma-user-repository.ts";
 import { PrismaUserStateRepository } from "./prisma-user-state-repository.ts";
+import { PrismaAdaptationRepository } from "./prisma-adaptation-repository.ts";
 
 export const repositories = {
   auth: new PrismaAuthRepository(),
@@ -11,5 +12,6 @@ export const repositories = {
   protocol: new PrismaProtocolRepository(),
   tracking: new PrismaTrackingRepository(),
   user: new PrismaUserRepository(),
-  userState: new PrismaUserStateRepository()
+  userState: new PrismaUserStateRepository(),
+  adaptation: new PrismaAdaptationRepository()
 };

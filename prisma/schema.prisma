@@ -27,7 +27,8 @@ model User {
   dailyTasks       DailyTask[]
   streak           Streak?
   checkins         Checkin[]
-  conversations    Conversation[]
+  conversations         Conversation[]
+  adaptationProposals   AdaptationProposal[]
 }
 
 model Profile {
@@ -137,4 +138,17 @@ model Message {
 enum MessageRole {
   user
   assistant
+}
+
+model AdaptationProposal {
+  id         String    @id @default(uuid())
+  userId     String
+  ruleId     String
+  reasoning  String
+  status     String    @default("proposed")
+  proposedAt DateTime  @default(now())
+  resolvedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
 }
