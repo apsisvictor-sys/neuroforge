@@ -55,8 +55,12 @@ async function getQueue(): Promise<Queue> {
     throw new Error("Redis connection failed");
   }
 
+  // Pass plain options to BullMQ so it uses its own internal ioredis instance.
+  // Avoids a TypeScript structural type conflict between top-level ioredis and
+  // the ioredis bundled inside bullmq/node_modules.
+  const { host, port, password } = readRedisEnv();
   queueInstance = new Queue(JOB_QUEUE_NAME, {
-    connection,
+    connection: { host, port, password, maxRetriesPerRequest: null },
     defaultJobOptions: {
       attempts: DEFAULT_ATTEMPTS,
       backoff: { type: "exponential", delay: BACKOFF_DELAY_MS },
