@@ -1,5 +1,4 @@
 import { Worker } from "bullmq";
-import IORedis from "ioredis";
 import { logger } from "@/infrastructure/logging/logger";
 import { noopMetricsRecorder } from "@/infrastructure/metrics/noop-metrics-recorder";
 import { assertRedisJobConfiguration, getRedisQueueName } from "@/infrastructure/jobs/redis-job-queue";
@@ -27,13 +26,10 @@ export async function startJobsWorker(): Promise<void> {
   const port = Number.parseInt(process.env.REDIS_PORT as string, 10);
   const password = process.env.REDIS_PASSWORD?.trim() || undefined;
 
-  const connection = new IORedis({
-    host,
-    port,
-    password,
-    maxRetriesPerRequest: null,
-    retryStrategy: () => null
-  });
+  // Pass plain options so BullMQ uses its own internal ioredis instance.
+  // Avoids a TypeScript structural type conflict between top-level ioredis
+  // and the ioredis bundled inside bullmq/node_modules.
+  const connectionOptions = { host, port, password, maxRetriesPerRequest: null as null };
 
   new Worker(
     getRedisQueueName(),
@@ -90,7 +86,7 @@ export async function startJobsWorker(): Promise<void> {
         throw error;
       }
     },
-    { connection }
+    { connection: connectionOptions }
   );
 
   logger.info("Background jobs worker started", { queueName: getRedisQueueName() });
