@@ -1,8 +1,6 @@
 import { Resend } from "resend";
 import { logger } from "@/infrastructure/logging/logger";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
 export async function sendMagicLinkEmail(email: string, magicLink: string) {
     if (!process.env.RESEND_API_KEY) {
         logger.warn("RESEND_API_KEY is not set. Falling back to console log for magic link.");
@@ -10,6 +8,8 @@ export async function sendMagicLinkEmail(email: string, magicLink: string) {
         return;
     }
 
+    // Lazy-init: only instantiate at request time so build succeeds without the key
+    const resend = new Resend(process.env.RESEND_API_KEY);
     try {
         const data = await resend.emails.send({
             from: "Neuroforge <hello@updates.neuroforge.app>", // TODO: We need to use a verified domain here eventually
