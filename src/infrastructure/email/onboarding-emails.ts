@@ -1,6 +1,15 @@
 import { Resend } from "resend";
 import { logger } from "@/infrastructure/logging/logger";
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY!);
 const FROM = "Neuroforge <hello@updates.neuroforge.app>";
 
@@ -29,15 +38,17 @@ async function sendOnboardingEmail(
 
 export async function sendOnboardingDay1(payload: OnboardingEmailPayload): Promise<void> {
   const { email, primaryType, recommendedProtocol } = payload;
+  const safeType = escapeHtml(primaryType);
+  const safeProtocol = escapeHtml(recommendedProtocol);
   await sendOnboardingEmail(
     email,
     "Your Neuroforge protocol starts today",
     `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-      <h2 style="color: #0f172a;">Your nervous system type: ${primaryType}</h2>
+      <h2 style="color: #0f172a;">Your nervous system type: ${safeType}</h2>
       <p>You've taken the first step. Here's your starting protocol:</p>
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
-        <p style="margin: 0; font-weight: 600;">${recommendedProtocol}</p>
+        <p style="margin: 0; font-weight: 600;">${safeProtocol}</p>
       </div>
       <p>Your job today is simple: follow the protocol once. That's it. Don't optimise, don't rush — just do it.</p>
       <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.neuroforge.app"}/today"
@@ -52,13 +63,14 @@ export async function sendOnboardingDay1(payload: OnboardingEmailPayload): Promi
 
 export async function sendOnboardingDay2(payload: OnboardingEmailPayload): Promise<void> {
   const { email, primaryType } = payload;
+  const safeType = escapeHtml(primaryType);
   await sendOnboardingEmail(
     email,
     "How did day 1 go?",
     `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
       <h2 style="color: #0f172a;">Check-in: 48 hours in</h2>
-      <p>Two days ago you learned your pattern is <strong>${primaryType}</strong>. The first session is always the hardest.</p>
+      <p>Two days ago you learned your pattern is <strong>${safeType}</strong>. The first session is always the hardest.</p>
       <p>If you missed yesterday — that's fine. That's expected. The protocol doesn't break if you skip one day. It breaks if you use a skip as a reason to quit.</p>
       <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.neuroforge.app"}/today"
          style="display:inline-block;padding:12px 24px;background:#0f172a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin:16px 0;">
@@ -92,13 +104,14 @@ export async function sendOnboardingDay4(payload: OnboardingEmailPayload): Promi
 
 export async function sendOnboardingDay6(payload: OnboardingEmailPayload): Promise<void> {
   const { email, primaryType } = payload;
+  const safeType = escapeHtml(primaryType);
   await sendOnboardingEmail(
     email,
     "Your pattern is shifting",
     `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
       <h2 style="color: #0f172a;">Day 6 — pattern check</h2>
-      <p>You've been working with your <strong>${primaryType}</strong> pattern for almost a week.</p>
+      <p>You've been working with your <strong>${safeType}</strong> pattern for almost a week.</p>
       <p>Research on nervous system regulation shows that the 7–10 day window is where the first measurable shift in baseline happens — not a cure, but a detectable change in the effort required to regulate.</p>
       <p>Tomorrow is day 7. Completing week 1 unlocks week 2's protocol adjustment.</p>
       <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.neuroforge.app"}/protocol"
@@ -112,6 +125,7 @@ export async function sendOnboardingDay6(payload: OnboardingEmailPayload): Promi
 
 export async function sendOnboardingDay7(payload: OnboardingEmailPayload): Promise<void> {
   const { email, recommendedProtocol } = payload;
+  const safeProtocol = escapeHtml(recommendedProtocol);
   await sendOnboardingEmail(
     email,
     "Week 1 complete — here's what's next",
@@ -121,7 +135,7 @@ export async function sendOnboardingDay7(payload: OnboardingEmailPayload): Promi
       <p>You completed your first week of nervous system work. That puts you ahead of 80% of people who start.</p>
       <p>Your protocol for week 2 builds on what you established:</p>
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
-        <p style="margin: 0;">${recommendedProtocol}</p>
+        <p style="margin: 0;">${safeProtocol}</p>
         <p style="margin: 8px 0 0; color: #64748b; font-size: 13px;">Week 2: increase consistency, add one recovery anchor.</p>
       </div>
       <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.neuroforge.app"}/protocol"
@@ -136,17 +150,19 @@ export async function sendOnboardingDay7(payload: OnboardingEmailPayload): Promi
 
 export async function sendOnboardingWeekly(payload: OnboardingEmailPayload & { weekNumber: number }): Promise<void> {
   const { email, primaryType, weekNumber } = payload;
+  const safeType = escapeHtml(primaryType);
+  const safeWeek = escapeHtml(String(weekNumber));
   await sendOnboardingEmail(
     email,
     `Week ${weekNumber} — nervous system update`,
     `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-      <h2 style="color: #0f172a;">Week ${weekNumber} check-in</h2>
-      <p>You've been managing your <strong>${primaryType}</strong> pattern for ${weekNumber} weeks.</p>
+      <h2 style="color: #0f172a;">Week ${safeWeek} check-in</h2>
+      <p>You've been managing your <strong>${safeType}</strong> pattern for ${safeWeek} weeks.</p>
       <p>Consistency compounds. Each week you stay with the protocol, the baseline cost of regulation drops.</p>
       <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://app.neuroforge.app"}/tracking"
          style="display:inline-block;padding:12px 24px;background:#0f172a;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;margin:16px 0;">
-        Review week ${weekNumber}
+        Review week ${safeWeek}
       </a>
     </div>
     `

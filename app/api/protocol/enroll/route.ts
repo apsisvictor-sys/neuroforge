@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireUserId } from "@/infrastructure/auth/require-user";
 import { repositories } from "@/infrastructure/db/repositories";
+import { noopMetricsRecorder } from "@/infrastructure/metrics/noop-metrics-recorder";
 import { badRequest, ok, serverError, withApiLogging } from "@/lib/api";
 import { requireString } from "@/lib/validate";
 
@@ -18,6 +19,7 @@ export const POST = withApiLogging("/api/protocol/enroll", "POST", async (reques
     }
 
     const enrollment = await repositories.protocol.enroll(auth.userId, protocolId, new Date().toISOString());
+    noopMetricsRecorder.increment("protocol.enroll");
     return ok({ enrollment });
   } catch (error) {
     return serverError(error);

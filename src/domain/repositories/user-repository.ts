@@ -1,4 +1,4 @@
-import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
+import type { OnboardingResponse, SubscriptionTier, User, UserProfile } from "@/domain/entities/user";
 import type { AssessmentResult } from "@/domain/assessment/types";
 
 export interface UserRepository {
@@ -10,4 +10,6 @@ export interface UserRepository {
   upsertProfile(input: { userId: string; displayName: string; timezone: string }): Promise<UserProfile>;
   saveOnboarding(userId: string, answers: OnboardingResponse): Promise<UserProfile>;
   saveAssessment(userId: string, result: AssessmentResult): Promise<UserProfile>;
+  updateSubscription(userId: string, tier: SubscriptionTier, stripeCustomerId?: string): Promise<void>;
+  getByStripeCustomerId(stripeCustomerId: string): Promise<User | null>;
 }

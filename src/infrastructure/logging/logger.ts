@@ -1,20 +1,42 @@
+import { getRequestContext } from "@/infrastructure/logging/request-context";
+
 type LogLevel = "info" | "warn" | "error";
 
+type LogPayload = {
+  level: LogLevel;
+  requestId?: string;
+  traceId?: string;
+  route?: string;
+  message: string;
+  meta?: Record<string, unknown>;
+  timestamp: string;
+};
+
 function write(level: LogLevel, message: string, meta?: Record<string, unknown>): void {
-  const payload = meta ? `${message} ${JSON.stringify(meta)}` : message;
-  const prefix = `[neuroforge:${level}]`;
+  const requestContext = getRequestContext();
 
+  const payload: LogPayload = {
+    level,
+    requestId:
+      typeof meta?.requestId === "string" ? meta.requestId : requestContext?.requestId,
+    traceId: typeof meta?.traceId === "string" ? meta.traceId : requestContext?.traceId,
+    route: typeof meta?.route === "string" ? meta.route : undefined,
+    message,
+    meta,
+    timestamp: new Date().toISOString()
+  };
+
+  const line = JSON.stringify(payload);
   if (level === "error") {
-    console.error(prefix, payload);
+    console.error(line);
     return;
   }
-
   if (level === "warn") {
-    console.warn(prefix, payload);
+    console.warn(line);
     return;
   }
 
-  console.log(prefix, payload);
+  console.log(line);
 }
 
 export const logger = {

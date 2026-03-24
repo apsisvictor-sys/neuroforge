@@ -1,10 +1,14 @@
 import type { AssessmentResult } from "@/domain/assessment/types";
 
+export type SubscriptionTier = "free" | "premium" | "professional";
+
 export type User = {
   id: string;
   email: string;
   createdAt: string;
   lastActiveAt: string;
+  subscriptionTier: SubscriptionTier;
+  stripeCustomerId?: string;
 };
 
 export type UserProfile = {

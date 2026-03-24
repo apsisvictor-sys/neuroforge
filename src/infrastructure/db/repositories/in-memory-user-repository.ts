@@ -1,4 +1,4 @@
-import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
+import type { OnboardingResponse, SubscriptionTier, User, UserProfile } from "@/domain/entities/user";
 import type { AssessmentResult } from "@/domain/assessment/types";
 import type { UserRepository } from "@/domain/repositories/user-repository";
 import { createId } from "@/lib/ids/create-id";
@@ -15,7 +15,7 @@ export class InMemoryUserRepository implements UserRepository {
 
   async create(email: string): Promise<User> {
     const now = new Date().toISOString();
-    const user: User = { id: createId(), email, createdAt: now, lastActiveAt: now };
+    const user: User = { id: createId(), email, createdAt: now, lastActiveAt: now, subscriptionTier: "free" };
     getMemoryStore().users.push(user);
     getMemoryStore().profiles.push({
       userId: user.id,
@@ -75,5 +75,17 @@ export class InMemoryUserRepository implements UserRepository {
 
     profile.onboardingAnswers = { ...profile.onboardingAnswers, assessment: result };
     return profile;
+  }
+
+  async updateSubscription(userId: string, tier: SubscriptionTier, stripeCustomerId?: string): Promise<void> {
+    const user = getMemoryStore().users.find((u) => u.id === userId);
+    if (user) {
+      user.subscriptionTier = tier;
+      if (stripeCustomerId) user.stripeCustomerId = stripeCustomerId;
+    }
+  }
+
+  async getByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+    return getMemoryStore().users.find((u) => u.stripeCustomerId === stripeCustomerId) ?? null;
   }
 }

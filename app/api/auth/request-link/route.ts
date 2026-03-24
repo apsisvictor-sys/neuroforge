@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { repositories } from "@/infrastructure/db/repositories";
 import { getEnv } from "@/infrastructure/config/env";
 import { logger } from "@/infrastructure/logging/logger";
+import { noopMetricsRecorder } from "@/infrastructure/metrics/noop-metrics-recorder";
+import { sendMagicLinkEmail } from "@/infrastructure/email/resend";
 import { badRequest, ok, serverError, withApiLogging } from "@/lib/api";
 
 export const POST = withApiLogging("/api/auth/request-link", "POST", async (request: NextRequest) => {
@@ -9,6 +11,7 @@ export const POST = withApiLogging("/api/auth/request-link", "POST", async (requ
     getEnv();
     const body = await request.json();
     const email = String(body.email ?? "").trim().toLowerCase();
+    noopMetricsRecorder.increment("auth.magic_link.request");
     if (!email || !email.includes("@")) {
       return badRequest("Valid email is required");
     }
@@ -24,9 +27,17 @@ export const POST = withApiLogging("/api/auth/request-link", "POST", async (requ
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const magicLink = `${appUrl}/auth/verify?token=${token}`;
 
-    logger.info("Magic link generated", { email, magicLink });
+    // Send email synchronously instead of using the background worker queue
+    await sendMagicLinkEmail(email, magicLink);
 
-    return ok({ success: true, message: "Magic link created", debugMagicLink: magicLink });
+    logger.info("Magic link generated and sent", { email, magicLink });
+
+    const isDev = process.env.NODE_ENV !== "production";
+    return ok({
+      success: true,
+      message: "Magic link created",
+      ...(isDev && { debugMagicLink: magicLink })
+    });
   } catch (error) {
     return serverError(error);
   }

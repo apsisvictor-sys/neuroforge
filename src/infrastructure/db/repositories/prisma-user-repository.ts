@@ -1,15 +1,17 @@
-import type { OnboardingResponse, User, UserProfile } from "@/domain/entities/user";
+import type { OnboardingResponse, SubscriptionTier, User, UserProfile } from "@/domain/entities/user";
 import type { UserRepository } from "@/domain/repositories/user-repository";
 import type { AssessmentResult } from "@/domain/assessment/types";
 import { prisma } from "@/infrastructure/db/prisma-client";
 import { Prisma } from "@prisma/client";
 
-function mapUser(row: { id: string; email: string; createdAt: Date; lastActiveAt: Date }): User {
+function mapUser(row: { id: string; email: string; createdAt: Date; lastActiveAt: Date; subscriptionTier: string; stripeCustomerId: string | null }): User {
   return {
     id: row.id,
     email: row.email,
     createdAt: row.createdAt.toISOString(),
-    lastActiveAt: row.lastActiveAt.toISOString()
+    lastActiveAt: row.lastActiveAt.toISOString(),
+    subscriptionTier: row.subscriptionTier as SubscriptionTier,
+    stripeCustomerId: row.stripeCustomerId ?? undefined
   };
 }
 
@@ -144,5 +146,20 @@ export class PrismaUserRepository implements UserRepository {
       }
       throw error;
     }
+  }
+
+  async updateSubscription(userId: string, tier: SubscriptionTier, stripeCustomerId?: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        subscriptionTier: tier,
+        ...(stripeCustomerId ? { stripeCustomerId } : {})
+      }
+    });
+  }
+
+  async getByStripeCustomerId(stripeCustomerId: string): Promise<User | null> {
+    const row = await prisma.user.findUnique({ where: { stripeCustomerId } });
+    return row ? mapUser(row) : null;
   }
 }

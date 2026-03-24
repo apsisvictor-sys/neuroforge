@@ -43,6 +43,9 @@ export function AppNav() {
           <Link href="/tracking" style={linkStyle("/tracking")}>
             Tracking
           </Link>
+          <Link href="/progress" style={linkStyle("/progress")}>
+            Progress
+          </Link>
           <Link href="/assistant" style={linkStyle("/assistant")}>
             Assistant
           </Link>
