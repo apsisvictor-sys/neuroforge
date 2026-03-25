@@ -1,14 +1,17 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const CSRF_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-const CSRF_SECRET = process.env.CSRF_SECRET?.trim();
 
-if (!CSRF_SECRET) {
-  throw new Error("CSRF_SECRET is required at startup");
+function getCsrfSecret(): string {
+  const secret = process.env.CSRF_SECRET?.trim();
+  if (!secret) {
+    throw new Error("CSRF_SECRET is required at startup");
+  }
+  return secret;
 }
 
 function sign(payload: string): string {
-  return createHmac("sha256", CSRF_SECRET as string).update(payload).digest("base64");
+  return createHmac("sha256", getCsrfSecret()).update(payload).digest("base64");
 }
 
 export function generateCsrfToken(): string {
