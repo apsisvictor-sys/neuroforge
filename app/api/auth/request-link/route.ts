@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import { repositories } from "@/infrastructure/db/repositories";
-import { getEnv } from "@/infrastructure/config/env";
 import { logger } from "@/infrastructure/logging/logger";
 import { noopMetricsRecorder } from "@/infrastructure/metrics/noop-metrics-recorder";
 import { sendMagicLinkEmail } from "@/infrastructure/email/resend";
@@ -8,7 +7,6 @@ import { badRequest, ok, serverError, withApiLogging } from "@/lib/api";
 
 export const POST = withApiLogging("/api/auth/request-link", "POST", async (request: NextRequest) => {
   try {
-    getEnv();
     const body = await request.json();
     const email = String(body.email ?? "").trim().toLowerCase();
     noopMetricsRecorder.increment("auth.magic_link.request");
