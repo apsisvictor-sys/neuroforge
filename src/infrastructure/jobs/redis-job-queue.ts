@@ -32,10 +32,12 @@ function getOrCreateRedisConnection(): IORedis {
   }
 
   const { host, port, password } = readRedisEnv();
+  // tls: {} is required for Upstash Redis (TLS-only endpoint, rediss:// scheme).
   redisConnectionInstance = new IORedis({
     host,
     port,
     password,
+    tls: {},
     maxRetriesPerRequest: null,
     retryStrategy: () => null
   });
@@ -58,9 +60,10 @@ async function getQueue(): Promise<Queue> {
   // Pass plain options to BullMQ so it uses its own internal ioredis instance.
   // Avoids a TypeScript structural type conflict between top-level ioredis and
   // the ioredis bundled inside bullmq/node_modules.
+  // tls: {} is required for Upstash Redis (TLS-only endpoint).
   const { host, port, password } = readRedisEnv();
   queueInstance = new Queue(JOB_QUEUE_NAME, {
-    connection: { host, port, password, maxRetriesPerRequest: null },
+    connection: { host, port, password, tls: {}, maxRetriesPerRequest: null },
     defaultJobOptions: {
       attempts: DEFAULT_ATTEMPTS,
       backoff: { type: "exponential", delay: BACKOFF_DELAY_MS },
@@ -109,10 +112,12 @@ export function assertRedisJobConfiguration(): void {
 
 export function createRedisClient(): IORedis {
   const { host, port, password } = readRedisEnv();
+  // tls: {} is required for Upstash Redis (TLS-only endpoint).
   return new IORedis({
     host,
     port,
     password,
+    tls: {},
     maxRetriesPerRequest: null,
     retryStrategy: () => null
   });
