@@ -1,4 +1,5 @@
 import type { JobQueue } from "@/domain/jobs/job-queue";
+import { logger } from "@/infrastructure/logging/logger";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
@@ -38,6 +39,12 @@ function getOrCreateRedisConnection(): IORedis {
     password,
     maxRetriesPerRequest: null,
     retryStrategy: () => null
+  });
+  // Prevent unhandled 'error' events from crashing the process when Redis is
+  // unavailable. Commands will still reject (caught by callers), but the async
+  // connection error won't bubble up as an uncaught exception.
+  redisConnectionInstance.on("error", (err: Error) => {
+    logger.warn("Redis connection error", { error: err.message });
   });
   return redisConnectionInstance;
 }
