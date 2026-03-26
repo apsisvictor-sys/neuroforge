@@ -11,8 +11,9 @@ export async function sendMagicLinkEmail(email: string, magicLink: string) {
     // Lazy-init: only instantiate at request time so build succeeds without the key
     const resend = new Resend(process.env.RESEND_API_KEY);
     try {
+        const fromAddress = process.env.RESEND_FROM_EMAIL ?? "hello@updates.neuroforge.app";
         const data = await resend.emails.send({
-            from: "Neuroforge <hello@updates.neuroforge.app>", // TODO: We need to use a verified domain here eventually
+            from: `Neuroforge <${fromAddress}>`,
             to: [email],
             subject: "Sign in to Neuroforge",
             html: `
