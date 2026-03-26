@@ -13,22 +13,32 @@ enum SubscriptionTier {
   professional
 }
 
+enum GiftCodeStatus {
+  PENDING_PAYMENT
+  PAID
+  REDEEMED
+  EXPIRED
+}
+
 model User {
   id               String           @id @default(uuid())
   email            String           @unique
   createdAt        DateTime         @default(now())
   lastActiveAt     DateTime         @default(now())
-  subscriptionTier SubscriptionTier @default(free)
-  stripeCustomerId String?          @unique
-  profile          Profile?
-  sessions         Session[]
-  magicTokens      MagicToken[]
-  enrollments      Enrollment[]
-  dailyTasks       DailyTask[]
-  streak           Streak?
-  checkins         Checkin[]
-  conversations         Conversation[]
-  adaptationProposals   AdaptationProposal[]
+  subscriptionTier         SubscriptionTier @default(free)
+  stripeCustomerId         String?          @unique
+  premiumGiftExpiresAt     DateTime?
+  profile                  Profile?
+  sessions                 Session[]
+  magicTokens              MagicToken[]
+  enrollments              Enrollment[]
+  dailyTasks               DailyTask[]
+  streak                   Streak?
+  checkins                 Checkin[]
+  conversations            Conversation[]
+  adaptationProposals      AdaptationProposal[]
+  purchasedGiftCodes       GiftCode[]       @relation("GiftCodePurchaser")
+  redeemedGiftCodes        GiftCode[]       @relation("GiftCodeRedeemer")
 }
 
 model Profile {
@@ -151,4 +161,25 @@ model AdaptationProposal {
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId, status])
+}
+
+model GiftCode {
+  id               String         @id @default(uuid())
+  code             String         @unique
+  status           GiftCodeStatus @default(PENDING_PAYMENT)
+  durationMonths   Int
+  purchaserEmail   String?
+  purchaserId      String?
+  recipientEmail   String?
+  redeemedByUserId String?
+  stripeSessionId  String?        @unique
+  expiresAt        DateTime?
+  redeemedAt       DateTime?
+  createdAt        DateTime       @default(now())
+
+  purchaser  User? @relation("GiftCodePurchaser", fields: [purchaserId], references: [id])
+  redeemedBy User? @relation("GiftCodeRedeemer", fields: [redeemedByUserId], references: [id])
+
+  @@index([code])
+  @@index([status])
 }
