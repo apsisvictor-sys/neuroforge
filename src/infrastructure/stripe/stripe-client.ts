@@ -14,7 +14,19 @@ export function getStripeClient(): Stripe {
 export const STRIPE_PRICES = {
   premiumMonthly: process.env.STRIPE_PRICE_PREMIUM_MONTHLY ?? "",
   premiumAnnual: process.env.STRIPE_PRICE_PREMIUM_ANNUAL ?? "",
-  professionalMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY ?? ""
+  professionalMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY ?? "",
+  giftPremium1M: process.env.STRIPE_GIFT_PREMIUM_1M_PRICE_ID ?? "",
+  giftPremium3M: process.env.STRIPE_GIFT_PREMIUM_3M_PRICE_ID ?? "",
+  giftPremium6M: process.env.STRIPE_GIFT_PREMIUM_6M_PRICE_ID ?? "",
+  giftPremium12M: process.env.STRIPE_GIFT_PREMIUM_12M_PRICE_ID ?? "",
 } as const;
+
+// Maps a gift price ID to how many months of premium it grants
+export const GIFT_PRICE_DURATION_MONTHS: Record<string, number> = {
+  [process.env.STRIPE_GIFT_PREMIUM_1M_PRICE_ID ?? ""]: 1,
+  [process.env.STRIPE_GIFT_PREMIUM_3M_PRICE_ID ?? ""]: 3,
+  [process.env.STRIPE_GIFT_PREMIUM_6M_PRICE_ID ?? ""]: 6,
+  [process.env.STRIPE_GIFT_PREMIUM_12M_PRICE_ID ?? ""]: 12,
+};
 
 export const FREE_PROTOCOL_LIMIT = 5;
