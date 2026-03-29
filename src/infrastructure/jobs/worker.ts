@@ -29,7 +29,8 @@ export async function startJobsWorker(): Promise<void> {
   // Pass plain options so BullMQ uses its own internal ioredis instance.
   // Avoids a TypeScript structural type conflict between top-level ioredis
   // and the ioredis bundled inside bullmq/node_modules.
-  const connectionOptions = { host, port, password, maxRetriesPerRequest: null as null };
+  // tls: {} is required for Upstash Redis (TLS-only endpoint).
+  const connectionOptions = { host, port, password, tls: {}, maxRetriesPerRequest: null as null };
 
   new Worker(
     getRedisQueueName(),
